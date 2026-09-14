@@ -1,22 +1,15 @@
-# Moe Wearable Lab — Step 4B V1
+# NH Interactive V8 — 24 Character Shop
 
-This is a safe test project for real separate 3D wearables.
+Built from the stable V7 version.
 
-## Files
-- `index.html`
-- `script.js`
-- `moe-beginner.vrm`
-- `wearables/` (put future `.glb` wearables here)
+New:
+- 24 collectible character styles
+- School / Sports / Casual / Japanese / Special / Premium filters
+- Buy with coins
+- Purchased characters stay in Inventory
+- Wear any owned character
+- Equipped character appears on the dashboard hero
+- Existing NH study modes and dashboard retained
+- Development coins remain at 999,999
 
-## What works now
-- The same known-working VRM loader
-- Front / Back / Left / Right camera views
-- Load a separate `.glb` wearable from your computer
-- Attach it to Chest / Upper Chest / Hips / Head
-- Equip / Unequip
-- Adjust scale, position, and Y rotation
-
-## Important
-There is intentionally **no fake hoodie mesh** bundled in this V1. A real hoodie that bends with Moe's body must be a compatible skinned/rigged 3D asset. When we obtain/create `english-hoodie.glb`, put it in `wearables/` and the site will try to load it automatically.
-
-This repo is for proving wearable compatibility before bringing the method back into `avatar-development`.
+Upload the CONTENTS of this folder to the existing `step3b` GitHub repository.
