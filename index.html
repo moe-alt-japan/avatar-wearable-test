@@ -301,6 +301,22 @@ body.dark .dashboard-hero{background:linear-gradient(135deg,#223d5d,#3a3157);col
 .whole-set-card.active .whole-set-wear{background:#57bd77}
 @media(max-width:560px){.whole-set-grid{grid-template-columns:1fr}}
 
+
+.shop-category-heading{
+  grid-column:1/-1;
+  padding:12px 4px 2px;
+}
+.shop-category-heading h3{margin:0;color:var(--text);font-size:1.15rem}
+.shop-category-heading small{display:block;margin-top:4px;color:var(--muted)}
+.whole-set-empty{
+  grid-column:1/-1;
+  padding:20px;
+  border:2px dashed #c7dfef;
+  border-radius:14px;
+  text-align:center;
+  color:#6f879e;
+}
+
 </style>
 
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/","@pixiv/three-vrm":"https://cdn.jsdelivr.net/npm/@pixiv/three-vrm@3/lib/three-vrm.module.min.js"}}</script>
@@ -331,7 +347,7 @@ body.dark .dashboard-hero{background:linear-gradient(135deg,#223d5d,#3a3157);col
     <div class="store-head"><div><p class="eyebrow">SPEND YOUR LEARNING COINS</p><h2 id="shopTitle">🛍️ Beginner Shop</h2><p>Buy rewards with the coins you earn from English practice.</p></div><button id="shopClose" class="store-close">✕ Close</button></div>
     <div class="store-summary"><span class="store-chip">🪙 Balance: <b id="shopBalance">0</b></span><span class="store-chip">🎒 Owned: <b id="shopOwnedCount">0</b> / 6</span></div>
     <div id="shopGrid" class="shop-grid"></div>
-    <div class="store-note">👕 Hoodie, pants, shoes, and accessories are saved as equipment now. Background rewards already change Moe's 3D viewer. We will connect real 3D clothing after the VRoid/XWear step.</div>
+    <div class="store-note">👕 Individual clothing and Whole Outfit Sets are different item types. Buy separate pieces individually, or buy a complete Whole Set.</div>
   </section>
 </div>
 <div id="inventoryBackdrop" class="store-backdrop" aria-hidden="true">
@@ -367,7 +383,7 @@ body.dark .dashboard-hero{background:linear-gradient(135deg,#223d5d,#3a3157);col
       <section class="inventory-panel inventory-equipped-panel">
         <div class="inventory-panel-title">EQUIPPED ITEMS</div>
         <div id="equipmentSlots" class="inventory-equipped-list"></div>
-        <div class="inventory-footer-note">White Hoodie now changes Moe’s real 3D model. Other clothing slots remain ready for future VRoid outfit versions.</div>
+        <div class="inventory-footer-note">Whole Sets load a complete VRM outfit. Hoodie and Pants remain separate equipment and can still be equipped individually.</div>
       </section>
     </div>
   </section>
@@ -1259,14 +1275,20 @@ showStudentSetup(false);syncStudentUI();
 /* v2.0 Shop + Inventory Integration */
 const NH_SHOP_KEY="nhInteractiveShopV1";
 const SHOP_ITEMS=[
-  {id:"white_hoodie",name:"Hoodie",icon:"🧥",price:500,type:"top",desc:"A comfy hoodie for Moe. More colors coming soon."},
-  {id:"black_cargo",name:"Pants",icon:"👖",price:400,type:"pants",desc:"A new pair of pants for Moe. More styles and colors coming soon."},
-  {id:"white_sneakers",name:"White Sneakers",icon:"👟",price:350,type:"shoes",desc:"Simple bright sneakers."},
-  {id:"headphones",name:"Blue Headphones",icon:"🎧",price:650,type:"accessory",desc:"A premium study accessory."},
-  {id:"school_bg",name:"School Background",icon:"🏫",price:300,type:"background",desc:"A bright school-sky avatar background."},
-  {id:"sunset_bg",name:"Sunset Background",icon:"🌇",price:450,type:"background",desc:"A warm evening avatar background."}
+  // Individual items
+  {id:"white_hoodie",name:"Hoodie",icon:"🧥",price:500,type:"top",category:"individual",desc:"A comfy hoodie for Moe. This is separate from Pants."},
+  {id:"black_cargo",name:"Pants",icon:"👖",price:400,type:"pants",category:"individual",desc:"A separate pair of pants. Buy and equip it independently."},
+  {id:"white_sneakers",name:"White Sneakers",icon:"👟",price:350,type:"shoes",category:"individual",desc:"Simple bright sneakers."},
+  {id:"headphones",name:"Blue Headphones",icon:"🎧",price:650,type:"accessory",category:"individual",desc:"A premium study accessory."},
+  {id:"school_bg",name:"School Background",icon:"🏫",price:300,type:"background",category:"individual",desc:"A bright school-sky avatar background."},
+  {id:"sunset_bg",name:"Sunset Background",icon:"🌇",price:450,type:"background",category:"individual",desc:"A warm evening avatar background."},
+
+  // Whole outfit sets — prices are temporary placeholders for testing.
+  {id:"set1",name:"Whole Set 01",icon:"🧥",price:1000,type:"whole_set",category:"whole",model:"set1",desc:"Complete VRM outfit. Buy the whole look as one item."},
+  {id:"set2",name:"Whole Set 02",icon:"👕",price:1000,type:"whole_set",category:"whole",model:"set2",desc:"Complete VRM outfit. Buy the whole look as one item."},
+  {id:"set3",name:"Whole Set 03",icon:"🥻",price:1000,type:"whole_set",category:"whole",model:"set3",desc:"Complete VRM outfit. Buy the whole look as one item."}
 ];
-const SHOP_SLOTS=[["head","Head","🧢"],["top","Top","👕"],["pants","Pants","👖"],["shoes","Shoes","👟"],["socks","Socks","🧦"],["gloves","Gloves","🧤"],["belt","Belt","🪢"],["background","Background","🖼️"]];
+const SHOP_SLOTS=[["whole_set","Whole Set","👔"],["head","Head","🧢"],["top","Top","👕"],["pants","Pants","👖"],["shoes","Shoes","👟"],["socks","Socks","🧦"],["gloves","Gloves","🧤"],["belt","Belt","🪢"],["background","Background","🖼️"]];
 let shopState={owned:[],equipped:{}};
 try{
   const saved=JSON.parse(localStorage.getItem(NH_SHOP_KEY)||"null");
@@ -1283,12 +1305,82 @@ function saveShop(){localStorage.setItem(NH_SHOP_KEY,JSON.stringify(shopState));
 function shopItem(id){return SHOP_ITEMS.find(x=>x.id===id)}
 function refreshCoins(){localStorage.setItem("portalCoins",portalCoins);localStorage.setItem("adventureCoins",portalCoins);if($("coinHeaderValue"))$("coinHeaderValue").textContent=portalCoins.toLocaleString();if($("coinValue"))$("coinValue").textContent=portalCoins.toLocaleString();if($("shopBalance"))$("shopBalance").textContent=portalCoins.toLocaleString();}
 function renderShop(){
-  refreshCoins();if($("shopOwnedCount"))$("shopOwnedCount").textContent=shopState.owned.length;
+  refreshCoins();
+  if($("shopOwnedCount"))$("shopOwnedCount").textContent=shopState.owned.length;
   const grid=$("shopGrid");if(!grid)return;grid.innerHTML="";
-  SHOP_ITEMS.forEach(item=>{const owned=shopState.owned.includes(item.id),equipped=shopState.equipped[item.type]===item.id;const card=document.createElement("article");card.className=`shop-card${equipped?" equipped":""}`;card.innerHTML=`<div class="shop-icon">${item.icon}</div><h3>${item.name}</h3><div class="shop-desc">${item.desc}</div><div class="shop-price">${owned?"✅ Owned":`${item.price} 🪙`}</div><button class="shop-action ${owned?"equip":"buy"} ${equipped?"active":""}">${equipped?"Equipped":owned?"Open Inventory":`Buy · ${item.price} 🪙`}</button>`;const b=card.querySelector("button");b.disabled=!owned&&portalCoins<item.price;b.onclick=()=>{if(owned){closeStore("shopBackdrop");openStore("inventoryBackdrop");return;}if(!SHOP_TEST_UNLIMITED_COINS&&portalCoins<item.price)return;if(!SHOP_TEST_UNLIMITED_COINS)portalCoins-=item.price;shopState.owned.push(item.id);saveShop();refreshCoins();renderShop();renderInventory();toast(`${item.name} purchased!`)};grid.appendChild(card);});
+
+  const groups=[
+    ["individual","🧩 Individual Items","Hoodie, pants, shoes and accessories are bought separately."],
+    ["whole","👔 Whole Outfit Sets","One purchase gives you the complete VRM outfit. Prices are temporary for testing."]
+  ];
+
+  groups.forEach(([category,title,note])=>{
+    const heading=document.createElement("div");
+    heading.className="shop-category-heading";
+    heading.innerHTML=`<h3>${title}</h3><small>${note}</small>`;
+    grid.appendChild(heading);
+
+    SHOP_ITEMS.filter(x=>x.category===category).forEach(item=>{
+      const owned=shopState.owned.includes(item.id);
+      const equipped=shopState.equipped[item.type]===item.id;
+      const card=document.createElement("article");
+      card.className=`shop-card${equipped?" equipped":""}`;
+      card.innerHTML=`
+        <div class="shop-icon">${item.icon}</div>
+        <h3>${item.name}</h3>
+        <div class="shop-desc">${item.desc}</div>
+        <div class="shop-price">${owned?"✅ Owned":`${item.price} 🪙${item.category==="whole"?" · TEST PRICE":""}`}</div>
+        <button class="shop-action ${owned?"equip":"buy"} ${equipped?"active":""}">
+          ${equipped?"Equipped":owned?"Open Inventory":`Buy · ${item.price} 🪙`}
+        </button>`;
+      const b=card.querySelector("button");
+      b.disabled=!owned&&portalCoins<item.price;
+      b.onclick=()=>{
+        if(owned){
+          closeStore("shopBackdrop");
+          openStore("inventoryBackdrop");
+          return;
+        }
+        if(!SHOP_TEST_UNLIMITED_COINS&&portalCoins<item.price)return;
+        if(!SHOP_TEST_UNLIMITED_COINS)portalCoins-=item.price;
+        shopState.owned.push(item.id);
+        saveShop();refreshCoins();renderShop();renderInventory();
+        toast(`${item.name} purchased!`);
+      };
+      grid.appendChild(card);
+    });
+  });
 }
-function equipItem(item){if(!shopState.owned.includes(item.id))return;shopState.equipped[item.type]=item.id;saveShop();renderShop();renderInventory();toast(`${item.name} equipped`)}
-function unequipSlot(type){delete shopState.equipped[type];saveShop();renderShop();renderInventory();toast("Item unequipped")}
+function equipItem(item){
+  if(!shopState.owned.includes(item.id))return;
+
+  if(item.type==="whole_set"){
+    shopState.equipped.whole_set=item.id;
+    // A full outfit replaces separate top/pants for the avatar model.
+    delete shopState.equipped.top;
+    delete shopState.equipped.pants;
+    activeWholeSet=item.id;
+    localStorage.setItem("nhWholeSetOutfit",activeWholeSet);
+  }else{
+    shopState.equipped[item.type]=item.id;
+    // Equipping separate clothing exits Whole Set mode.
+    if(item.type==="top"||item.type==="pants"){
+      delete shopState.equipped.whole_set;
+      activeWholeSet="";
+      localStorage.removeItem("nhWholeSetOutfit");
+    }
+  }
+
+  saveShop();renderShop();renderInventory();toast(`${item.name} equipped`);
+}
+function unequipSlot(type){
+  delete shopState.equipped[type];
+  if(type==="whole_set"){
+    activeWholeSet="";
+    localStorage.removeItem("nhWholeSetOutfit");
+  }
+  saveShop();renderShop();renderInventory();toast("Item unequipped");
+}
 function renderInventory(){
   renderWholeSets();
   const slots=$("equipmentSlots"),grid=$("inventoryGrid");if(!slots||!grid)return;
@@ -1385,34 +1477,39 @@ const WHOLE_SET_OUTFITS=[
 let activeWholeSet=localStorage.getItem('nhWholeSetOutfit')||'';
 
 function renderWholeSets(){
-  const grid=document.getElementById('wholeSetGrid');
+  const grid=document.getElementById("wholeSetGrid");
   if(!grid)return;
-  grid.innerHTML='';
-  WHOLE_SET_OUTFITS.forEach(item=>{
-    const card=document.createElement('article');
-    const active=activeWholeSet===item.id;
-    card.className=`whole-set-card${active?' active':''}`;
+  grid.innerHTML="";
+
+  const ownedSets=WHOLE_SET_OUTFITS.filter(set=>shopState?.owned?.includes(set.id));
+  if(!ownedSets.length){
+    grid.innerHTML=`<div class="whole-set-empty">No Whole Sets owned yet.<br><small>Buy one from the Shop first.</small></div>`;
+    return;
+  }
+
+  ownedSets.forEach(set=>{
+    const active=shopState.equipped.whole_set===set.id;
+    const card=document.createElement("article");
+    card.className=`whole-set-card${active?" active":""}`;
     card.innerHTML=`
-      <div class="whole-set-thumb">${item.icon}</div>
-      <div class="whole-set-name">${item.name}</div>
-      <div class="whole-set-sub">${item.subtitle}</div>
-      <button class="whole-set-wear">${active?'✓ Wearing':'Wear'}</button>
-    `;
-    card.querySelector('.whole-set-wear').onclick=(e)=>{
+      <div class="whole-set-thumb">${set.icon}</div>
+      <div class="whole-set-name">${set.name}</div>
+      <div class="whole-set-sub">Complete outfit</div>
+      <button class="whole-set-wear">${active?"✓ Wearing":"Wear"}</button>`;
+    card.querySelector(".whole-set-wear").onclick=e=>{
       e.stopPropagation();
-      activeWholeSet=item.id;
-      localStorage.setItem('nhWholeSetOutfit',activeWholeSet);
-      if(!started)startAvatar();
-      loadAvatar(item.file);
-      renderWholeSets();
+      equipItem(shopItem(set.id));
     };
-    card.onclick=()=>card.querySelector('.whole-set-wear').click();
+    card.onclick=()=>card.querySelector(".whole-set-wear").click();
     grid.appendChild(card);
   });
 }
 
 function resize(){if(!renderer)return;const c=$a('avatarCanvas'),r=c.getBoundingClientRect();renderer.setSize(Math.max(1,r.width),Math.max(1,r.height),false);camera.aspect=r.width/Math.max(1,r.height);camera.updateProjectionMatrix();}
 function desiredAvatar(equipped={}){
+  if(equipped.whole_set==='set1') return SAMPLE1_AVATAR;
+  if(equipped.whole_set==='set2') return SAMPLE2_AVATAR;
+  if(equipped.whole_set==='set3') return SAMPLE3_AVATAR;
   if(equipped.top==='white_hoodie' && equipped.pants==='black_cargo') return HOODIE_PANTS_AVATAR;
   if(equipped.top==='white_hoodie') return HOODIE_AVATAR;
   if(equipped.pants==='black_cargo') return PANTS_AVATAR;
