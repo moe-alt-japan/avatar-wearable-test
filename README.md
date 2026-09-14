@@ -1,19 +1,20 @@
-# NH Interactive V7 — Generic Shop + Pants Test
+# NH Interactive V10 — 3D Shop Logic
 
-Development build with unlimited testing coins.
+Built from the working V9 VRoid build.
 
-Changes:
-- Shop title `White English Hoodie` → `Hoodie`
-- Shop title `Black Cargo Pants` → `Pants`
-- Pants now use the correct `pants` inventory slot
-- Added real `moe-pants.vrm` model
-- Equipping Pants shows the real pants VRM when Hoodie is not equipped
-- Hoodie remains the real `moe-hoodie.vrm`
-- Beginner uses `moe-beginner.vrm`
+New in V10:
+- Beginner = free/default
+- White Hoodie = 1,200 coins
+- Black Pants = 1,200 coins
+- Hoodie + Black Pants unlocks automatically when both are owned
+- Purchased looks remain in Inventory
+- Wear buttons switch to the related VRM
+- Equipped look and coins save in localStorage
+- Test balance remains 999,999 coins
 
-Note: Hoodie + Pants together will need one combined VRM model in the current whole-model system. Hoodie currently has visual priority when both slots are equipped.
-
-V8: Replaced Pants VRM with corrected white T-shirt + black pants export; bumped pants cache version to v=61.
-
-
-V9: Added real Hoodie + Pants VRM combination. Equipping both Top=Hoodie and Pants=Pants loads moe-hoodie-pants.vrm.
+GitHub Desktop workflow:
+1. Extract this ZIP.
+2. Copy all files into your local `avatar-wearable-test` folder.
+3. Replace existing files when Windows asks.
+4. Commit changes.
+5. Push origin.
