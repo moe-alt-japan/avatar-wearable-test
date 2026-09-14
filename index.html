@@ -230,34 +230,29 @@ body.dark .dashboard-hero{background:linear-gradient(135deg,#223d5d,#3a3157);col
 @media(max-width:1100px){.inventory-studio-body{grid-template-columns:1fr 1fr;height:auto;max-height:calc(94vh - 110px);overflow:auto}.inventory-avatar-column{min-height:520px}.inventory-equipped-panel{grid-column:1/-1}.inventory-quote{display:none}}
 @media(max-width:720px){.inventory-studio-body{grid-template-columns:1fr}.inventory-equipped-panel{grid-column:auto}.inventory-item-grid{grid-template-columns:repeat(4,1fr)}.inventory-avatar-column{min-height:480px}.inventory-studio-head{padding:16px}.inventory-title-icon{font-size:2.3rem}.inventory-title-wrap h2{font-size:1.8rem}}
 
+
+/* VRM Sample Test Panel */
+.vrm-test-panel{
+  position:fixed;right:18px;bottom:18px;z-index:15000;
+  width:min(340px,calc(100vw - 36px));
+  background:var(--card);color:var(--text);
+  border:1px solid var(--line);border-radius:20px;
+  box-shadow:0 20px 55px rgba(0,0,0,.24);
+  padding:16px;
+}
+.vrm-test-panel h3{margin:0 0 6px;font-size:1.05rem}
+.vrm-test-panel p{margin:0 0 12px;color:var(--muted);font-size:.82rem}
+.vrm-test-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.vrm-test-btn{
+  border:1px solid var(--line);background:var(--soft);color:var(--text);
+  border-radius:12px;padding:10px;font-weight:900;cursor:pointer
+}
+.vrm-test-btn:hover{background:var(--brand);color:#fff}
+.vrm-test-status{margin-top:10px;font-size:.78rem;color:var(--muted);font-weight:800}
+
 </style>
 
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/","@pixiv/three-vrm":"https://cdn.jsdelivr.net/npm/@pixiv/three-vrm@3/lib/three-vrm.module.min.js"}}</script>
-
-<style id="nh-v10-shop-style">
-#v10ShopPanel{margin:28px auto;max-width:1180px;background:linear-gradient(135deg,#f7fbff,#fbf7ff);border:1px solid #cfe3fb;border-radius:24px;padding:22px;box-shadow:0 16px 38px rgba(41,84,130,.10);font-family:Arial,Helvetica,sans-serif}
-.v10-head{display:flex;justify-content:space-between;gap:20px;align-items:center;margin-bottom:18px}
-.v10-eyebrow{font-size:12px;letter-spacing:.18em;font-weight:800;color:#3d8fe8}
-.v10-head h2{margin:4px 0 6px;font-size:28px;color:#143a63}.v10-head p{margin:0;color:#60758d}
-.v10-coin-box{background:#fff;border:1px solid #d7e5f5;border-radius:999px;padding:12px 18px;font-weight:800;color:#173b63}
-.v10-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
-.v10-look-card{background:#fff;border:1px solid #dfeaf6;border-radius:18px;padding:16px;box-shadow:0 7px 18px rgba(0,0,0,.05)}
-.v10-look-card.wearing{outline:3px solid #52c886;background:#f4fff8}
-.v10-badge{display:inline-block;background:#edf6ff;color:#3378bb;border-radius:999px;padding:5px 9px;font-size:12px;font-weight:800}
-.v10-model-name{font-size:18px;font-weight:900;color:#173b63;margin-top:10px}
-.v10-model-file{font-size:11px;color:#8a9aac;margin-top:4px}
-.v10-look-card p{min-height:42px;color:#5f7287;font-size:13px;line-height:1.4}
-.v10-price{font-weight:900;color:#174e82;margin:8px 0 10px}
-.v10-action{width:100%;border:0;border-radius:12px;padding:10px 12px;background:#368ee8;color:white;font-weight:900;cursor:pointer}
-.v10-action:disabled{background:#58c88a;cursor:default}
-.v10-inventory{margin-top:20px;padding-top:18px;border-top:1px solid #dbe8f4}.v10-inventory h3{margin:0 0 10px;color:#173b63}
-.v10-inventory-list{display:flex;flex-wrap:wrap;gap:8px}
-.v10-inv-chip{border:1px solid #cbdff3;background:white;border-radius:999px;padding:9px 12px;font-weight:800;color:#31577b;cursor:pointer}
-.v10-inv-chip.active{background:#173b63;color:#fff}
-@media(max-width:900px){.v10-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:560px){.v10-head{align-items:flex-start;flex-direction:column}.v10-grid{grid-template-columns:1fr}}
-</style>
-
 </head>
 <body>
 <div id="studentSetup" class="setup-overlay hidden" aria-modal="true" role="dialog">
@@ -1327,75 +1322,50 @@ $a('avatarClose').onclick=()=>{$a('avatarBackdrop').classList.remove('open');$a(
 $a('avatarBackdrop').addEventListener('click',e=>{if(e.target===$a('avatarBackdrop'))$a('avatarClose').click()});
 </script>
 
-<script id="nh-v10-shop-logic">
+<div id="vrmSampleTestPanel" class="vrm-test-panel">
+  <h3>🧪 VRM Outfit Test</h3>
+  <p>Temporary test buttons only. No shop prices yet.</p>
+  <div class="vrm-test-grid">
+    <button class="vrm-test-btn" data-vrm-test="moe-beginner.vrm">Beginner</button>
+    <button class="vrm-test-btn" data-vrm-test="vrm1.vrm">Sample 1</button>
+    <button class="vrm-test-btn" data-vrm-test="vrm2.vrm">Sample 2</button>
+    <button class="vrm-test-btn" data-vrm-test="vrm3.vrm">Sample 3</button>
+  </div>
+  <div id="vrmSampleTestStatus" class="vrm-test-status">Ready to test.</div>
+</div>
+
+<script id="vrm-sample-test-script">
 (() => {
-  const KEY = "nhV10AvatarState";
-  const DEFAULT_STATE = {coins:999999,owned:{beginner:true,hoodie:false,pants:false,combo:false},wearing:"beginner"};
-  const LOOKS = {
-    beginner:{name:"Beginner Outfit",jp:"ベーシック",price:0,model:"moe-beginner.vrm",desc:"Simple starter look."},
-    hoodie:{name:"White Hoodie",jp:"白パーカー",price:1200,model:"moe-hoodie.vrm",desc:"A clean casual hoodie look."},
-    pants:{name:"Black Pants",jp:"黒パンツ",price:1200,model:"moe-pants.vrm",desc:"A sharper black-pants look."},
-    combo:{name:"Hoodie + Black Pants",jp:"パーカー＋黒パンツ",price:0,model:"moe-hoodie-pants.vrm",desc:"Unlocks automatically after you own Hoodie and Black Pants."}
-  };
-
-  function loadState(){
-    try{
-      const s=JSON.parse(localStorage.getItem(KEY)||"{}");
-      return {coins:Number.isFinite(s.coins)?s.coins:DEFAULT_STATE.coins,owned:{...DEFAULT_STATE.owned,...(s.owned||{})},wearing:LOOKS[s.wearing]?s.wearing:"beginner"};
-    }catch(e){return JSON.parse(JSON.stringify(DEFAULT_STATE))}
-  }
-  let state=loadState();
-  function save(){localStorage.setItem(KEY,JSON.stringify(state))}
-  function unlockCombo(){if(state.owned.hoodie&&state.owned.pants)state.owned.combo=true}
-
-  function switchModel(file){
-    const candidates=["loadAvatarModel","loadVRM","switchAvatarModel","setAvatarModel","loadModel"];
-    for(const name of candidates){
-      if(typeof window[name]==="function"){
-        try{return window[name](file)}catch(e){console.error(e)}
-      }
+  function findSwitcher(){
+    const names=["loadAvatarModel","loadVRM","switchAvatarModel","setAvatarModel","loadModel"];
+    for(const n of names){
+      if(typeof window[n]==="function") return window[n];
     }
-    window.dispatchEvent(new CustomEvent("nh-avatar-model-change",{detail:{model:file}}));
+    return null;
   }
 
-  function wear(id){
-    if(!LOOKS[id]||!state.owned[id])return;
-    state.wearing=id;save();switchModel(LOOKS[id].model);render();
-  }
-  function buy(id){
-    const look=LOOKS[id]; if(!look)return;
-    if(state.owned[id]) return wear(id);
-    if(id==="combo"){unlockCombo();save();return render()}
-    if(state.coins<look.price){alert("Not enough coins yet!");return}
-    state.coins-=look.price;state.owned[id]=true;unlockCombo();save();wear(id);
-  }
-
-  function ensurePanel(){
-    if(document.getElementById("v10ShopPanel"))return;
-    const host=document.querySelector("#shopView,.shop-view,#avatarShopView,.avatar-shop,main")||document.body;
-    const panel=document.createElement("section");
-    panel.id="v10ShopPanel";
-    panel.innerHTML=`<div class="v10-head"><div><div class="v10-eyebrow">3D AVATAR SHOP</div><h2>Build Your Look</h2><p>Buy pieces, keep them in your inventory, and switch your VRoid instantly.</p></div><div class="v10-coin-box">🪙 <span id="v10CoinBalance"></span></div></div><div class="v10-grid" id="v10ShopGrid"></div><div class="v10-inventory"><h3>🎒 My 3D Inventory</h3><div id="v10InventoryList" class="v10-inventory-list"></div></div>`;
-    host.appendChild(panel);
-    panel.addEventListener("click",e=>{const b=e.target.closest(".v10-action");if(b)buy(b.dataset.look)});
+  async function switchTo(file,label){
+    const status=document.getElementById("vrmSampleTestStatus");
+    status.textContent=`Loading ${label}...`;
+    const fn=findSwitcher();
+    try{
+      if(fn){
+        await fn(file);
+      }else{
+        window.dispatchEvent(new CustomEvent("nh-avatar-model-change",{detail:{model:file}}));
+      }
+      status.textContent=`Loaded: ${label}`;
+    }catch(err){
+      console.error(err);
+      status.textContent=`Could not load ${label}`;
+    }
   }
 
-  function render(){
-    unlockCombo();save();ensurePanel();
-    document.getElementById("v10CoinBalance").textContent=state.coins.toLocaleString();
-    const grid=document.getElementById("v10ShopGrid");
-    grid.innerHTML=Object.entries(LOOKS).map(([id,o])=>{
-      const owned=!!state.owned[id], wearing=state.wearing===id;
-      const text=wearing?"✓ Wearing":owned?"Wear":(id==="combo"?"Own Hoodie + Pants":`Buy · ${o.price.toLocaleString()} 🪙`);
-      return `<article class="v10-look-card ${wearing?"wearing":""}"><div class="v10-badge">${o.jp}</div><div class="v10-model-name">${o.name}</div><div class="v10-model-file">${o.model}</div><p>${o.desc}</p><div class="v10-price">${o.price===0?(id==="combo"?"SET UNLOCK":"FREE"):"🪙 "+o.price.toLocaleString()}</div><button class="v10-action" data-look="${id}" ${wearing?"disabled":""}>${text}</button></article>`;
-    }).join("");
-    const inv=document.getElementById("v10InventoryList");
-    inv.innerHTML=Object.entries(LOOKS).filter(([id])=>state.owned[id]).map(([id,o])=>`<button class="v10-inv-chip ${state.wearing===id?"active":""}" data-inv="${id}">${state.wearing===id?"✓ ":""}${o.name}</button>`).join("");
-    inv.querySelectorAll("[data-inv]").forEach(b=>b.onclick=()=>wear(b.dataset.inv));
-  }
-
-  window.NH_V10_SHOP={LOOKS,get state(){return state},buy,wear,reset(){state=JSON.parse(JSON.stringify(DEFAULT_STATE));save();render()}};
-  document.addEventListener("DOMContentLoaded",()=>{render();setTimeout(()=>wear(state.wearing),900)});
+  document.querySelectorAll("[data-vrm-test]").forEach(btn=>{
+    btn.addEventListener("click",()=>{
+      switchTo(btn.dataset.vrmTest,btn.textContent.trim());
+    });
+  });
 })();
 </script>
 
