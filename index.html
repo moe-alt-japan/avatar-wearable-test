@@ -1305,6 +1305,9 @@ const BASE_AVATAR='./moe-beginner.vrm?v=50';
 const HOODIE_AVATAR='./moe-hoodie.vrm?v=60';
 const PANTS_AVATAR='./moe-pants.vrm?v=61';
 const HOODIE_PANTS_AVATAR='./moe-hoodie-pants.vrm?v=70';
+const SAMPLE1_AVATAR='./vrm1.vrm?v=1';
+const SAMPLE2_AVATAR='./vrm2.vrm?v=1';
+const SAMPLE3_AVATAR='./vrm3.vrm?v=1';
 function resize(){if(!renderer)return;const c=$a('avatarCanvas'),r=c.getBoundingClientRect();renderer.setSize(Math.max(1,r.width),Math.max(1,r.height),false);camera.aspect=r.width/Math.max(1,r.height);camera.updateProjectionMatrix();}
 function desiredAvatar(equipped={}){
   if(equipped.top==='white_hoodie' && equipped.pants==='black_cargo') return HOODIE_PANTS_AVATAR;
@@ -1313,10 +1316,24 @@ function desiredAvatar(equipped={}){
   return BASE_AVATAR;
 }
 function getEquipment(){try{return JSON.parse(localStorage.getItem('nhInteractiveShopV1')||'{}').equipped||{}}catch{return {}}}
-function loadAvatar(file){if(!loader||currentAvatarFile===file)return;currentAvatarFile=file;const label=file===HOODIE_PANTS_AVATAR?'Hoodie + Pants':file===HOODIE_AVATAR?'Hoodie':file===PANTS_AVATAR?'Pants':'Beginner Moe';$a('avatarStatus').textContent=`Loading ${label}…`;loader.load(file,gltf=>{const next=gltf.userData.vrm;VRMUtils.removeUnnecessaryVertices(gltf.scene);VRMUtils.combineSkeletons(gltf.scene);next.scene.rotation.y=Math.PI;if(vrm){scene.remove(vrm.scene);try{VRMUtils.deepDispose(vrm.scene)}catch{}}vrm=next;scene.add(vrm.scene);$a('avatarStatus').textContent=`✅ ${label} loaded · drag to rotate · wheel to zoom`;},undefined,e=>{$a('avatarStatus').textContent='❌ Avatar could not load. Check the VRM files.';currentAvatarFile='';console.error(e)});}
+function loadAvatar(file){if(!loader||currentAvatarFile===file)return;currentAvatarFile=file;const label=file===HOODIE_PANTS_AVATAR?'Hoodie + Pants':file===HOODIE_AVATAR?'Hoodie':file===PANTS_AVATAR?'Pants':file===SAMPLE1_AVATAR?'Sample 1':file===SAMPLE2_AVATAR?'Sample 2':file===SAMPLE3_AVATAR?'Sample 3':'Beginner Moe';$a('avatarStatus').textContent=`Loading ${label}…`;loader.load(file,gltf=>{const next=gltf.userData.vrm;VRMUtils.removeUnnecessaryVertices(gltf.scene);VRMUtils.combineSkeletons(gltf.scene);next.scene.rotation.y=Math.PI;if(vrm){scene.remove(vrm.scene);try{VRMUtils.deepDispose(vrm.scene)}catch{}}vrm=next;scene.add(vrm.scene);$a('avatarStatus').textContent=`✅ ${label} loaded · drag to rotate · wheel to zoom`;},undefined,e=>{$a('avatarStatus').textContent='❌ Avatar could not load. Check the VRM files.';currentAvatarFile='';console.error(e)});}
 function startAvatar(){if(started){resize();loadAvatar(desiredAvatar(getEquipment()));return;}started=true;const canvas=$a('avatarCanvas');renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});renderer.setPixelRatio(Math.min(devicePixelRatio,2));scene=new THREE.Scene();scene.background=new THREE.Color(0xcfefff);camera=new THREE.PerspectiveCamera(30,1,.1,100);camera.position.set(0,1.35,4.2);controls=new OrbitControls(camera,canvas);controls.target.set(0,1.15,0);controls.enableDamping=true;scene.add(new THREE.HemisphereLight(0xffffff,0x71849a,2.2));const dl=new THREE.DirectionalLight(0xffffff,2.2);dl.position.set(2,4,3);scene.add(dl);const floor=new THREE.Mesh(new THREE.CircleGeometry(1.35,64),new THREE.MeshStandardMaterial({color:0xffffff,roughness:1}));floor.rotation.x=-Math.PI/2;floor.position.y=0;scene.add(floor);resize();window.addEventListener('resize',resize);loader=new GLTFLoader();loader.register(p=>new VRMLoaderPlugin(p));loadAvatar(desiredAvatar(getEquipment()));const clock=new THREE.Clock();function loop(){raf=requestAnimationFrame(loop);const d=clock.getDelta();if(vrm)vrm.update(d);controls.update();renderer.render(scene,camera)}loop();}
 function applyAvatarEquipment(equipped={}){if(!scene)return;const bg=equipped.background;if(bg==='school_bg')scene.background=new THREE.Color(0xbfe3ff);else if(bg==='sunset_bg')scene.background=new THREE.Color(0xffc9a8);else scene.background=new THREE.Color(0xcfefff);loadAvatar(desiredAvatar(equipped));}
 window.addEventListener('nh-equipment-change',e=>applyAvatarEquipment(e.detail||{}));
+window.addEventListener('nh-avatar-model-change',e=>{
+  const requested=e.detail?.model;
+  const map={
+    'moe-beginner.vrm':BASE_AVATAR,
+    'vrm1.vrm':SAMPLE1_AVATAR,
+    'vrm2.vrm':SAMPLE2_AVATAR,
+    'vrm3.vrm':SAMPLE3_AVATAR
+  };
+  const file=map[requested];
+  if(!file)return;
+  if(!started)startAvatar();
+  loadAvatar(file);
+});
+
 $a('avatarBtn').onclick=()=>{$a('avatarBackdrop').classList.add('open');$a('avatarBackdrop').setAttribute('aria-hidden','false');$a('avatarStudentName').textContent=localStorage.getItem('nhStudentNickname')||'Student';requestAnimationFrame(()=>{startAvatar();applyAvatarEquipment(getEquipment())})};
 $a('avatarClose').onclick=()=>{$a('avatarBackdrop').classList.remove('open');$a('avatarBackdrop').setAttribute('aria-hidden','true')};
 $a('avatarBackdrop').addEventListener('click',e=>{if(e.target===$a('avatarBackdrop'))$a('avatarClose').click()});
