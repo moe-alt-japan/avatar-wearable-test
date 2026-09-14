@@ -1,15 +1,19 @@
-# NH Interactive V8 — 24 Character Shop
+# NH Interactive V7 — Generic Shop + Pants Test
 
-Built from the stable V7 version.
+Development build with unlimited testing coins.
 
-New:
-- 24 collectible character styles
-- School / Sports / Casual / Japanese / Special / Premium filters
-- Buy with coins
-- Purchased characters stay in Inventory
-- Wear any owned character
-- Equipped character appears on the dashboard hero
-- Existing NH study modes and dashboard retained
-- Development coins remain at 999,999
+Changes:
+- Shop title `White English Hoodie` → `Hoodie`
+- Shop title `Black Cargo Pants` → `Pants`
+- Pants now use the correct `pants` inventory slot
+- Added real `moe-pants.vrm` model
+- Equipping Pants shows the real pants VRM when Hoodie is not equipped
+- Hoodie remains the real `moe-hoodie.vrm`
+- Beginner uses `moe-beginner.vrm`
 
-Upload the CONTENTS of this folder to the existing `step3b` GitHub repository.
+Note: Hoodie + Pants together will need one combined VRM model in the current whole-model system. Hoodie currently has visual priority when both slots are equipped.
+
+V8: Replaced Pants VRM with corrected white T-shirt + black pants export; bumped pants cache version to v=61.
+
+
+V9: Added real Hoodie + Pants VRM combination. Equipping both Top=Hoodie and Pants=Pants loads moe-hoodie-pants.vrm.
