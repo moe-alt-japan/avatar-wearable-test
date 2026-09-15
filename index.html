@@ -317,6 +317,14 @@ body.dark .dashboard-hero{background:linear-gradient(135deg,#223d5d,#3a3157);col
   color:#6f879e;
 }
 
+
+.inventory-item-tile{position:relative}
+.inventory-set-tag{
+  display:block;margin-top:3px;font-size:.52rem;font-weight:900;
+  letter-spacing:.06em;color:#2b78bd;
+}
+.inventory-item-tile.equipped .inventory-set-tag{color:#0c7a39}
+
 </style>
 
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/","@pixiv/three-vrm":"https://cdn.jsdelivr.net/npm/@pixiv/three-vrm@3/lib/three-vrm.module.min.js"}}</script>
@@ -361,15 +369,7 @@ body.dark .dashboard-hero{background:linear-gradient(135deg,#223d5d,#3a3157);col
     <div class="inventory-studio-body">
       <section class="inventory-panel">
         <div class="inventory-panel-title">ITEMS IN YOUR INVENTORY</div>
-        <div class="whole-set-panel">
-  <div class="whole-set-title">
-    <h3>👕 WHOLE SET OUTFITS</h3>
-    <small>Test collection · prices later</small>
-  </div>
-  <div id="wholeSetGrid" class="whole-set-grid"></div>
-</div>
-<div style="height:14px"></div>
-<div id="inventoryGrid" class="inventory-item-grid"></div>
+        <div id="inventoryGrid" class="inventory-item-grid"></div>
       </section>
       <section class="inventory-avatar-column">
         <div class="inventory-avatar-name"><span id="inventoryStudentName">Student</span> · Level <span id="inventoryStudentLevel">1</span></div>
@@ -383,7 +383,7 @@ body.dark .dashboard-hero{background:linear-gradient(135deg,#223d5d,#3a3157);col
       <section class="inventory-panel inventory-equipped-panel">
         <div class="inventory-panel-title">EQUIPPED ITEMS</div>
         <div id="equipmentSlots" class="inventory-equipped-list"></div>
-        <div class="inventory-footer-note">Whole Sets load a complete VRM outfit. Hoodie and Pants remain separate equipment and can still be equipped individually.</div>
+        <div class="inventory-footer-note">Purchased items appear here together. Hoodie and Pants are separate pieces; Whole Set 01–03 are complete VRM outfits.</div>
       </section>
     </div>
   </section>
@@ -1382,7 +1382,6 @@ function unequipSlot(type){
   saveShop();renderShop();renderInventory();toast("Item unequipped");
 }
 function renderInventory(){
-  renderWholeSets();
   const slots=$("equipmentSlots"),grid=$("inventoryGrid");if(!slots||!grid)return;
   if($("inventoryCoinBalance"))$("inventoryCoinBalance").textContent=portalCoins.toLocaleString();
   if($("inventoryStudentName"))$("inventoryStudentName").textContent=localStorage.getItem("nhStudentNickname")||"Student";
@@ -1394,21 +1393,13 @@ function renderInventory(){
   });
   slots.querySelectorAll("[data-slot]").forEach(b=>b.onclick=()=>unequipSlot(b.dataset.slot));
   grid.innerHTML="";const owned=SHOP_ITEMS.filter(i=>shopState.owned.includes(i.id));
-  owned.forEach(item=>{const equipped=shopState.equipped[item.type]===item.id;const tile=document.createElement("button");tile.className=`inventory-item-tile${equipped?" equipped":""}`;tile.title=`${item.name}${equipped?" · Equipped":" · Click to equip"}`;tile.innerHTML=`<div class="inventory-item-icon">${item.icon}</div><small>${item.name}</small>`;tile.onclick=()=>equipped?unequipSlot(item.type):equipItem(item);grid.appendChild(tile)});
+  owned.forEach(item=>{const equipped=shopState.equipped[item.type]===item.id;const tile=document.createElement("button");tile.className=`inventory-item-tile${equipped?" equipped":""}`;tile.title=`${item.name}${equipped?" · Equipped":" · Click to equip"}`;tile.innerHTML=`<div class="inventory-item-icon">${item.icon}</div><small>${item.name}</small>${item.type==="whole_set"?'<span class="inventory-set-tag">WHOLE SET</span>':""}`;tile.onclick=()=>equipped?unequipSlot(item.type):equipItem(item);grid.appendChild(tile)});
   const targetCount=30;for(let i=owned.length;i<targetCount;i++){const e=document.createElement("div");e.className="inventory-empty-tile";grid.appendChild(e)}
 }
 
 function mountAvatarStageInInventory(){
   const host=$("inventoryAvatarHost"),stage=document.querySelector(".avatar-stage");if(!host||!stage)return;host.appendChild(stage);
-  try{
-    if(activeWholeSet){
-      const chosen=WHOLE_SET_OUTFITS.find(x=>x.id===activeWholeSet);
-      if(chosen){ if(!started)startAvatar(); loadAvatar(chosen.file); }
-      else applyAvatarEquipment(shopState.equipped||{});
-    }else{
-      applyAvatarEquipment(shopState.equipped||{});
-    }
-  }catch{}
+  try{const eq=shopState.equipped||{};applyAvatarEquipment(eq)}catch{}
   requestAnimationFrame(()=>{startAvatar();resize()});
 }
 function restoreAvatarStage(){const modal=document.querySelector("#avatarBackdrop .avatar-modal"),stage=document.querySelector(".avatar-stage");if(modal&&stage)modal.appendChild(stage);}
@@ -1468,42 +1459,6 @@ const HOODIE_PANTS_AVATAR='./moe-hoodie-pants.vrm?v=70';
 const SAMPLE1_AVATAR='./vrm1.vrm?v=1';
 const SAMPLE2_AVATAR='./vrm2.vrm?v=1';
 const SAMPLE3_AVATAR='./vrm3.vrm?v=1';
-
-const WHOLE_SET_OUTFITS=[
-  {id:'set1',name:'Whole Set 01',subtitle:'Outfit Collection',icon:'🧥',file:SAMPLE1_AVATAR},
-  {id:'set2',name:'Whole Set 02',subtitle:'Outfit Collection',icon:'👕',file:SAMPLE2_AVATAR},
-  {id:'set3',name:'Whole Set 03',subtitle:'Outfit Collection',icon:'🥻',file:SAMPLE3_AVATAR}
-];
-let activeWholeSet=localStorage.getItem('nhWholeSetOutfit')||'';
-
-function renderWholeSets(){
-  const grid=document.getElementById("wholeSetGrid");
-  if(!grid)return;
-  grid.innerHTML="";
-
-  const ownedSets=WHOLE_SET_OUTFITS.filter(set=>shopState?.owned?.includes(set.id));
-  if(!ownedSets.length){
-    grid.innerHTML=`<div class="whole-set-empty">No Whole Sets owned yet.<br><small>Buy one from the Shop first.</small></div>`;
-    return;
-  }
-
-  ownedSets.forEach(set=>{
-    const active=shopState.equipped.whole_set===set.id;
-    const card=document.createElement("article");
-    card.className=`whole-set-card${active?" active":""}`;
-    card.innerHTML=`
-      <div class="whole-set-thumb">${set.icon}</div>
-      <div class="whole-set-name">${set.name}</div>
-      <div class="whole-set-sub">Complete outfit</div>
-      <button class="whole-set-wear">${active?"✓ Wearing":"Wear"}</button>`;
-    card.querySelector(".whole-set-wear").onclick=e=>{
-      e.stopPropagation();
-      equipItem(shopItem(set.id));
-    };
-    card.onclick=()=>card.querySelector(".whole-set-wear").click();
-    grid.appendChild(card);
-  });
-}
 
 function resize(){if(!renderer)return;const c=$a('avatarCanvas'),r=c.getBoundingClientRect();renderer.setSize(Math.max(1,r.width),Math.max(1,r.height),false);camera.aspect=r.width/Math.max(1,r.height);camera.updateProjectionMatrix();}
 function desiredAvatar(equipped={}){
